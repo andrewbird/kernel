@@ -49,4 +49,84 @@ if [ -d ${HOME}/.dosemu/drive_c/tc201 ] ; then
   fi
 fi
 cd ..
-exit 0
+
+echo Now run Dosemu2\'s test suite
+TGT="test-dosemu2"
+
+if [ ! -d "${TGT}" ] ; then
+  echo "{TGT}" does not exist, run ci_test_prereq.sh
+  exit 3
+fi
+
+export SKIP_EXPENSIVE=1
+
+export TEST_DOSEMU=/usr/bin/dosemu
+export TEST_CMDDIR=/usr/share/dosemu/dosemu2-cmds-0.3
+export NO_FAILFAST=1
+
+# Use the production FreeCOM from FreeDOS 1.3
+tar -xf test-binaries/FR-DOS-1.30.tar command.com
+export FDOS_COMMAND_COM="$(pwd)/command.com"
+
+echo "##########################################################################"
+echo "#                     Testing Cross Compiled GCC build                   #"
+echo "##########################################################################"
+KDIR="_output/gcc"
+cp ${KDIR}/kgc8632.sys ${KDIR}/kernel.sys
+export FDOS_KERNEL_SYS="${KDIR}/kernel.sys"
+export FDOS_SHARE_COM="${KDIR}/share.com"
+export FDOS_COUNTRY_SYS="${KDIR}/country.sys"
+"${TGT}"/test_dosemu.py FRDOSGITTestCase
+mkdir ${KDIR}/failures
+for f in test_dosemu*.log test_dosemu*.xpt ;  do
+  [ -e "$f" ] && mv "$f" ${KDIR}/failures/.
+done
+
+echo "##########################################################################"
+echo "#                  Testing Cross Compiled Watcom build                   #"
+echo "##########################################################################"
+KDIR="_output/wc"
+cp ${KDIR}/kwc8632.sys ${KDIR}/kernel.sys
+export FDOS_KERNEL_SYS="${KDIR}/kernel.sys"
+#export FDOS_SHARE_COM="${KDIR}/share.com"  # Share not currently buildable with watcom, so use gcc build
+export FDOS_COUNTRY_SYS="${KDIR}/country.sys"
+"${TGT}"/test_dosemu.py FRDOSGITTestCase
+mkdir ${KDIR}/failures
+for f in test_dosemu*.log test_dosemu*.xpt ;  do
+  [ -e "$f" ] && mv "$f" ${KDIR}/failures/.
+done
+
+echo "##########################################################################"
+echo "#                  Testing Native Compiled Watcom build                  #"
+echo "##########################################################################"
+KDIR="_output/wc_dos"
+cp ${KDIR}/kwc38632.sys ${KDIR}/kernel.sys
+export FDOS_KERNEL_SYS="${KDIR}/kernel.sys"
+#export FDOS_SHARE_COM="${KDIR}/share.com"  # Share not currently buildable with watcom, so use gcc build
+export FDOS_COUNTRY_SYS="${KDIR}/country.sys"
+"${TGT}"/test_dosemu.py FRDOSGITTestCase
+mkdir ${KDIR}/failures
+for f in test_dosemu*.log test_dosemu*.xpt ;  do
+  [ -e "$f" ] && mv "$f" ${KDIR}/failures/.
+done
+
+echo "##########################################################################"
+echo "#                  Testing Native Compiled TurboC build                  #"
+echo "##########################################################################"
+KDIR="_output/tc_dos"
+cp ${KDIR}/ktc8632.sys ${KDIR}/kernel.sys
+export FDOS_KERNEL_SYS="${KDIR}/kernel.sys"
+export FDOS_SHARE_COM="${KDIR}/share.com"
+export FDOS_COUNTRY_SYS="${KDIR}/country.sys"
+"${TGT}"/test_dosemu.py FRDOSGITTestCase
+mkdir ${KDIR}/failures
+for f in test_dosemu*.log test_dosemu*.xpt ;  do
+  [ -e "$f" ] && mv "$f" ${KDIR}/failures/.
+done
+
+# Now see if we have any failures and return the appropriate error code
+for i in _output/*/failures/test_*.*.*.log ; do
+  test -f $i || exit 0
+done
+
+exit 1
