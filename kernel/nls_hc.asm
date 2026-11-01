@@ -1,6 +1,7 @@
 ; Hardcoded DOS-NLS information for country = 1, codepage = 437
-; This is an automatically generated file!
-; Any modifications will be lost!
+; This used to be an automatically generated file, however it has
+; been modified manually many times since its inclusion and will
+; continue to be so.
 
 ; Prerequisites:
 ;; ==> Assuming that data of tables remains constant all the time
@@ -80,8 +81,8 @@ _nlsFUpcaseHardcoded:
 	GLOBAL _nlsFnameTermHardcoded
 _nlsFnameTermHardcoded:
 ?table5:
-	DB  016h, 000h, 08eh, 000h, 0ffh, 041h, 000h, 020h
-	DB  0eeh, 00eh, 02eh, 022h, 02fh, 05ch, 05bh, 05dh
+	DB  016h, 000h, 001h, 000h, 0ffh, 000h, 000h, 020h
+	DB  002h, 00eh, 02eh, 022h, 02fh, 05ch, 05bh, 05dh
 	DB  03ah, 07ch, 03ch, 03eh, 02bh, 03dh, 03bh, 02ch
 	GLOBAL _nlsCollHardcoded
 _nlsCollHardcoded:
